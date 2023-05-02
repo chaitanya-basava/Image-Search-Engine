@@ -2,16 +2,10 @@ package com.basava;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.flickr4java.flickr.Flickr;
-import com.flickr4java.flickr.FlickrException;
-import com.flickr4java.flickr.REST;
-import com.flickr4java.flickr.photos.Photo;
-import com.flickr4java.flickr.photos.PhotoList;
-import com.flickr4java.flickr.photos.PhotosInterface;
-import com.flickr4java.flickr.photos.SearchParameters;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Map;
 
 public class Main {
@@ -27,21 +21,11 @@ public class Main {
         }
     }
 
-    public static void main(String[] args) throws FlickrException {
+    public static void main(String[] args) {
         Map<String, String> secrets = Main.getSecrets();
+        FlickrExtractor extractor = new FlickrExtractor(secrets);
+        List<FlickrImage> flickrImages = extractor.extract();
 
-        Flickr flickr = new Flickr(secrets.get("API_KEY"), secrets.get("SECRET"), new REST());
-        PhotosInterface photosInterface = flickr.getPhotosInterface();
-
-        SearchParameters params = new SearchParameters();
-        params.setMedia("photos");
-
-        PhotoList<Photo> results = photosInterface.search(params, 10, 1);
-        results.forEach(p ->
-        {
-            System.out.printf("Title: %s%n", p.getTitle());
-            System.out.printf("ID: %s%n", p.getId());
-            System.out.printf("Original Photo URL: %s%n", p.getMedium640Url());
-        });
+        flickrImages.forEach(System.out::println);
     }
 }
