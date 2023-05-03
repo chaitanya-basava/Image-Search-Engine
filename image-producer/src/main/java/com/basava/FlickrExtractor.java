@@ -2,7 +2,6 @@ package com.basava;
 
 import com.flickr4java.flickr.REST;
 import com.flickr4java.flickr.Flickr;
-import com.basava.schemas.FlickrImage;
 import com.flickr4java.flickr.people.User;
 import com.flickr4java.flickr.photos.Photo;
 import com.flickr4java.flickr.FlickrException;
@@ -25,7 +24,7 @@ public class FlickrExtractor {
         this.flickr = new Flickr(secrets.get("API_KEY"), secrets.get("SECRET"), new REST());
     }
 
-    List<FlickrImage> extract() {
+    List<FlickrImage> extract(int perPage, int page) {
         ArrayList<FlickrImage> flickrImages = new ArrayList<>();
 
         PhotosInterface photosInterface = flickr.getPhotosInterface();
@@ -35,7 +34,7 @@ public class FlickrExtractor {
             SearchParameters params = new SearchParameters();
             params.setMedia("photos");
 
-            PhotoList<Photo> photos = photosInterface.search(params, 10, 1);
+            PhotoList<Photo> photos = photosInterface.search(params, perPage, page);
             photos.forEach(photo ->
             {
                 try {
