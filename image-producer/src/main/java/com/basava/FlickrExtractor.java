@@ -1,21 +1,22 @@
 package com.basava;
 
-import com.flickr4java.flickr.Flickr;
-import com.flickr4java.flickr.FlickrException;
 import com.flickr4java.flickr.REST;
-import com.flickr4java.flickr.people.PeopleInterface;
+import com.flickr4java.flickr.Flickr;
+import com.basava.schemas.FlickrImage;
 import com.flickr4java.flickr.people.User;
 import com.flickr4java.flickr.photos.Photo;
+import com.flickr4java.flickr.FlickrException;
 import com.flickr4java.flickr.photos.PhotoList;
+import com.flickr4java.flickr.people.PeopleInterface;
 import com.flickr4java.flickr.photos.PhotosInterface;
 import com.flickr4java.flickr.photos.SearchParameters;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
 
 public class FlickrExtractor {
     private final Flickr flickr;
@@ -38,16 +39,23 @@ public class FlickrExtractor {
             photos.forEach(photo ->
             {
                 try {
-                    User user = peopleInterface.getInfo(photo.getOwner().getId());
+                    if(photo.getMedium640Url() == null)
+                        throw new FlickrException("Medium640 url can't be null");
 
-                    FlickrImage image = new FlickrImage(
-                            photo.getTitle(),
-                            photo.getId(),
-                            photo.getMedium640Url(),
-                            user.getUsername(),
-                            user.getRealName(),
-                            user.getProfileurl()
-                    );
+                    User user = peopleInterface.getInfo(photo.getOwner().getId());
+                    Photo photoDetails = photosInterface.getInfo(photo.getId(), null);
+
+                    String[] userUrlId = user.getProfileurl().split("/");
+
+                    FlickrImage image = FlickrImage.newBuilder()
+                            .setTitle(photo.getTitle())
+                            .setId(photo.getId())
+                            .setImgUrl(photo.getMedium640Url())
+                            .setUserUrlId(userUrlId[userUrlId.length - 1])
+                            .setDescription(photoDetails.getDescription())
+                            .setPostedOn(photoDetails.getDatePosted().getTime())
+                            .build();
+
                     flickrImages.add(image);
                 } catch (FlickrException e) {
                     logger.error(e.getErrorMessage());

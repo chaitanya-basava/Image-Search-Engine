@@ -1,0 +1,13 @@
+{
+  "namespace": "com.basava.schemas",
+  "type": "record",
+  "name": "FlickrImage",
+  "fields": [
+    {"name": "title", "type": "string"},
+    {"name": "id", "type": "string"},
+    {"name": "imgUrl", "type": "string"},
+    {"name": "userUrlId", "type": "string"},
+    {"name": "description", "type": ["null", "string"], "default": null},
+    {"name":  "postedOn", "type": "long"}
+  ]
+}
