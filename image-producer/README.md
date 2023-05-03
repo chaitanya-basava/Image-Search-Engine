@@ -20,13 +20,25 @@ PATH="$PATH:$CONFLUENT_PATH/bin"
 2. Run kafka by running these 2 cmds in separate terminals
 ```
 zookeeper-server-start $CONFLUENT_CONFIG_PATH/kafka/zookeeper.properties
-
+```
+```
 kafka-server-start $CONFLUENT_CONFIG_PATH/kafka/server.properties
 ```
 
 3. Create `flickr-images` (you may use any name of choice) topic using
 ```
 kafka-topics --create --bootstrap-server localhost:9092 --replication-factor 1 --partitions 2 --topic flickr-images
+```
+```
+kafka-configs --alter --add-config retention.ms=21600000 --bootstrap-server=localhost:9092 --topic flickr-images
+```
+```
+kafka-configs --alter --add-config retention.bytes=1073741824 --bootstrap-server=localhost:9092 --topic flickr-images
+```
+
+Msg retention is set to 6hrs with max storage of 1GB. Check config using this cmd
+```
+kafka-configs --bootstrap-server localhost:9092 --entity-type topics --entity-name flickr-images --describe --all
 ```
 
 4. Start the schema registry using this cmd
