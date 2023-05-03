@@ -35,7 +35,10 @@ public class Main {
 
         List<FlickrImage> images = extractor.extract(1, 1);
 
-        try(KafkaProducerManager<FlickrImage> producerManager = new KafkaProducerManager<>()) {
+        try(
+                KafkaProducerManager<FlickrImage> producerManager =
+                        new KafkaProducerManager<>(System.getenv("KAFKA_RUN_TYPE"))
+        ) {
             FlickrImage image = images.get(0);
 
             ProducerRecord<String, FlickrImage> imageRecord = new ProducerRecord<>(
