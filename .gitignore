@@ -192,3 +192,6 @@ secrets.*
 prod*
 
 *.iml
+
+# mlflow model artifacts
+mlflow_*/
