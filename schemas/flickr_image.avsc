@@ -7,7 +7,6 @@
     {"name": "id", "type": "string"},
     {"name": "imgUrl", "type": "string"},
     {"name": "userUrlId", "type": "string"},
-    {"name": "description", "type": ["null", "string"]},
     {"name":  "postedOn", "type": "long"}
   ]
 }

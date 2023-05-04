@@ -32,25 +32,25 @@ public class Main {
         Map<String, String> secrets = Main.getSecrets();
         FlickrExtractor extractor = new FlickrExtractor(secrets);
 
-        List<FlickrImage> images = extractor.extract();
-        // images.forEach(image -> logger.info(image.toString()));
-
         try(
                 KafkaProducerManager<FlickrImage> producerManager =
                         new KafkaProducerManager<>(System.getenv("KAFKA_RUN_TYPE"))
         ) {
-            FlickrImage image = images.get(0);
+            List<FlickrImage> images = extractor.extract();
+            // images.forEach(image -> logger.info(image.toString()));
 
-            ProducerRecord<String, FlickrImage> imageRecord = new ProducerRecord<>(
-                    Main.KAFKA_TOPIC_NAME, image.getId().toString(), image
-            );
+            images.forEach(image -> {
+                ProducerRecord<String, FlickrImage> imageRecord = new ProducerRecord<>(
+                        Main.KAFKA_TOPIC_NAME, image.getId().toString(), image
+                );
 
-            producerManager.producer.send(imageRecord, (recordMetadata, e) -> {
-                if (e == null) {
-                    logger.info("Success " + recordMetadata.toString());
-                } else {
-                    logger.error(e.getMessage());
-                }
+                producerManager.producer.send(imageRecord, (recordMetadata, e) -> {
+                    if (e == null) {
+                        logger.info("Success " + recordMetadata.toString());
+                    } else {
+                        logger.error(e.getMessage());
+                    }
+                });
             });
 
             producerManager.producer.flush();

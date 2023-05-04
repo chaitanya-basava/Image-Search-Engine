@@ -187,3 +187,6 @@ cython_debug/
 
 # any secrets being used in this project
 secrets.*
+
+# any prod configs
+prod*

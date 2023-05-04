@@ -26,7 +26,14 @@ public class FlickrExtractor {
     private final Map<String, Integer> tagCounts;
     private final Logger logger = LoggerFactory.getLogger(FlickrExtractor.class);
     private final String cachePath =
-            new File("image-producer/src/main/resources").getAbsolutePath() + "/cache/tags.json";
+            new File(
+                    FlickrExtractor.class
+                            .getProtectionDomain()
+                            .getCodeSource()
+                            .getLocation()
+                            .getPath()
+            ).getAbsolutePath().replace("target/classes", "src/main/resources")
+                    + "/cache/tags.json";
 
     FlickrExtractor(Map<String, String> secrets) {
         this.flickr = new Flickr(secrets.get("API_KEY"), secrets.get("SECRET"), new REST());
@@ -65,7 +72,6 @@ public class FlickrExtractor {
                             .setId(photo.getId())
                             .setImgUrl(imgUrl[3] + "/" + imgUrl[4])
                             .setUserUrlId(userUrlId[userUrlId.length - 1])
-                            .setDescription(photoDetails.getDescription())
                             .setPostedOn(photoDetails.getDatePosted().getTime())
                             .build();
 
@@ -76,7 +82,6 @@ public class FlickrExtractor {
             });
 
             this.updateTagValue(key);
-            this.updateTagsCache();
         } catch (FlickrException e) {
             throw new RuntimeException(e);
         }
@@ -114,6 +119,8 @@ public class FlickrExtractor {
             FileWriter file = new FileWriter(cachePath);
             file.write(jsonResult);
             file.close();
+
+            logger.info("[UPDATED] tags at " + cachePath);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

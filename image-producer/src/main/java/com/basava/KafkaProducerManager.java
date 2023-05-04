@@ -15,8 +15,14 @@ public class KafkaProducerManager<T> implements AutoCloseable {
     final Producer<String, T> producer;
 
     KafkaProducerManager(String kafkaRunType) {
-        String path = new File("image-producer/src/main/resources").getAbsolutePath() +
-                String.format("/kafka/%s.properties", kafkaRunType);
+        String path =
+                new File(
+                        KafkaProducerManager.class
+                                .getProtectionDomain()
+                                .getCodeSource()
+                                .getLocation()
+                                .getPath()
+                ).getAbsolutePath() + String.format("/kafka/%s.properties", kafkaRunType);
 
         Properties kafkaProps = new Properties();
         kafkaProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
