@@ -30,10 +30,10 @@ public class Main {
 
     public static void main(String[] args) {
         Map<String, String> secrets = Main.getSecrets();
-        logger.info(secrets.toString());
         FlickrExtractor extractor = new FlickrExtractor(secrets);
 
-        List<FlickrImage> images = extractor.extract(1, 1);
+        List<FlickrImage> images = extractor.extract();
+        // images.forEach(image -> logger.info(image.toString()));
 
         try(
                 KafkaProducerManager<FlickrImage> producerManager =
@@ -56,6 +56,8 @@ public class Main {
             producerManager.producer.flush();
         } catch (Exception e) {
             throw new RuntimeException(e);
+        } finally {
+            extractor.updateTagsCache();
         }
     }
 }
