@@ -7,7 +7,7 @@ from transformers import logging
 from transformers import AutoProcessor, CLIPModel
 
 from pyspark.sql import SparkSession
-from pyspark.sql.types import DoubleType, ArrayType
+from pyspark.sql.types import ArrayType, DoubleType
 
 logging.set_verbosity(40)
 
@@ -27,24 +27,17 @@ class ClipImageEmbeddingModel(mlflow.pyfunc.PythonModel):
         return pd.Series(image_features.squeeze(0).cpu().detach().numpy())
 
 
-# clipImageEmbeddingModel = ClipImageEmbeddingModel()
-# mlflow.pyfunc.save_model(path="./mlflow_clip_model", python_model=clipImageEmbeddingModel)
+default_model_path = "./mlflow_clip_model"
 
-# url = "https://farm66.staticflickr.com/65535/52743059408_a9eac98298_z.jpg"
-# loaded_model = mlflow.pyfunc.load_model("./mlflow_clip_model")
-# print(loaded_model.predict(url))
 
-spark = SparkSession \
-    .builder \
-    .master("local[3]") \
-    .appName("Image Consumer App") \
-    .config("spark.port.maxRetries", 100) \
-    .getOrCreate()
+def save_model(path=default_model_path):
+    clip_image_embedding_model = ClipImageEmbeddingModel()
+    mlflow.pyfunc.save_model(path=path, python_model=clip_image_embedding_model)
 
-clip_model = mlflow.pyfunc.spark_udf(
-    spark,
-    model_uri="./mlflow_clip_model",
-    result_type=ArrayType(DoubleType()),
-    env_manager="conda"
-)
-print(clip_model)
+
+def load_model(path=default_model_path):
+    return mlflow.pyfunc.load_model(path)
+
+
+def load_model_udf(spark: SparkSession, path=default_model_path):
+    return mlflow.pyfunc.spark_udf(spark=spark, model_uri=path, result_type=ArrayType(DoubleType()))

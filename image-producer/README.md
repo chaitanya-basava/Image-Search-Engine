@@ -50,7 +50,7 @@ schema-registry-start $CONFLUENT_CONFIG_PATH/schema-registry/schema-registry.pro
 provided in `schemas` directory.
 6. Create `secrets.json` file inside [resources](src/main/resources) folder and pass Flickr's `API_KEY` and `SECRET`.
 7. Supply Kafka producer properties as a `{KAFKA_RUN_TYPE}.properties` file places inside `resources/kafka` dir.
-View [local.properties](src/main/resources/kafka/local.properties) for reference.
+View [local.properties](../kafka/local.properties) for reference.
 8. Execute the main method in Main class, this will start the producer.
 
 **NOTE:** Set `KAFKA_TOPIC_NAME` env variable if using a different topic name.

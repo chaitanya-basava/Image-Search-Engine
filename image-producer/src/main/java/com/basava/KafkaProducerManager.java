@@ -15,6 +15,7 @@ public class KafkaProducerManager<T> implements AutoCloseable {
     final Producer<String, T> producer;
 
     KafkaProducerManager(String kafkaRunType) {
+        // TODO: make path more dynamic
         String path =
                 new File(
                         KafkaProducerManager.class
@@ -22,7 +23,7 @@ public class KafkaProducerManager<T> implements AutoCloseable {
                                 .getCodeSource()
                                 .getLocation()
                                 .getPath()
-                ).getAbsolutePath() + String.format("/kafka/%s.properties", kafkaRunType);
+                ).getAbsolutePath() + String.format("/../../../kafka/%s.properties", kafkaRunType);
 
         Properties kafkaProps = new Properties();
         kafkaProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
