@@ -1,10 +1,9 @@
+import pyspark.sql.functions as f
 from pyspark.sql import SparkSession
 from pyspark.sql.avro.functions import from_avro
-from pyspark.sql.functions import expr
 
 from clip_model import load_model_udf
 
-schema_registry_url = "http://localhost:8081"
 
 if __name__ == "__main__":
     spark = SparkSession \
@@ -18,14 +17,36 @@ if __name__ == "__main__":
     avroSchema = open("../schemas/flickr_image.avsc", "r").read()
 
     df = (
-        spark.read
+        spark.readStream
         .format("kafka")
         .option("kafka.bootstrap.servers", "localhost:9092")
         .option("subscribe", "flickr-images")
         .option("startingOffsets", "earliest")
         .load()
-        .withColumn("value", expr("substring(value, 6, length(value)-5)"))  # needed when using confluent
-        .withColumn("value", from_avro("value", avroSchema))
     )
 
-    df.select("value.*").show(truncate=False)
+    img_emb_df = (
+        df
+        .withColumn("value", f.expr("substring(value, 6, length(value)-5)"))  # needed when using confluent
+        .withColumn("value", from_avro("value", avroSchema))
+        .select(
+            "value.*",
+            predict(
+                f.concat(f.lit("https://farm66.staticflickr.com/"), f.col("value.imgUrl"))
+            ).alias("image_emb")
+        )
+    )
+
+    # TODO: update sink to ElasticSearch
+    query = (
+        img_emb_df.writeStream
+        .format("json")
+        .queryName("Image embedding extractor")
+        .outputMode("append")
+        .option("path", "output")
+        .option("checkpointLocation", "chk-point-dir/img_emb_extractor")
+        .trigger(processingTime="1 minute")
+        .start()
+    )
+
+    query.awaitTermination()

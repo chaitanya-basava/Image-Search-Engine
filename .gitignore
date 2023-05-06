@@ -195,3 +195,7 @@ prod*
 
 # mlflow model artifacts
 mlflow_*/
+
+# pyspark checkpoints
+chk-point-dir/
+output/

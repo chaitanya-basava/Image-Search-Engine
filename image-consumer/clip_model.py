@@ -1,5 +1,6 @@
 import torch
 import mlflow
+import shutil
 import requests
 import pandas as pd
 from PIL import Image
@@ -19,12 +20,15 @@ class ClipImageEmbeddingModel(mlflow.pyfunc.PythonModel):
         self.model = CLIPModel.from_pretrained(self.model_name)
         self.processor = AutoProcessor.from_pretrained(self.model_name)
 
-    def predict(self, context, image_url):
-        image = Image.open(requests.get(image_url, stream=True).raw)
-        inputs = self.processor(images=image, return_tensors="pt")
-        image_features = self.model.get_image_features(**inputs)
+    def predict(self, context, df):
+        images = []
+        for row in df.iloc:
+            images.append(Image.open(requests.get(row.to_list()[0], stream=True).raw))
 
-        return pd.Series(image_features.squeeze(0).cpu().detach().numpy())
+        inputs = self.processor(images=images, return_tensors="pt")
+        image_embeds = self.model.get_image_features(**inputs).squeeze(0).cpu().detach().numpy().tolist()
+
+        return pd.DataFrame(image_embeds)
 
 
 default_model_path = "./mlflow_clip_model"
@@ -41,3 +45,15 @@ def load_model(path=default_model_path):
 
 def load_model_udf(spark: SparkSession, path=default_model_path):
     return mlflow.pyfunc.spark_udf(spark=spark, model_uri=path, result_type=ArrayType(DoubleType()))
+
+
+if __name__ == '__main__':
+    shutil.rmtree(default_model_path)
+    save_model(default_model_path)
+    model = load_model(default_model_path)
+
+    url = pd.DataFrame([
+        "https://farm66.staticflickr.com/65535/52743059408_a9eac98298_z.jpg",
+        "https://farm66.staticflickr.com/65535/52743059408_a9eac98298_z.jpg"
+    ])
+    print(model.predict(url).shape)
