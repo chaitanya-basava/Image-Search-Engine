@@ -37,16 +37,27 @@ if __name__ == "__main__":
         )
     )
 
-    # TODO: update sink to ElasticSearch
+    # TODO: complete es ingestion
     query = (
         img_emb_df.writeStream
-        .format("json")
+        .format("org.elasticsearch.spark.sql")
         .queryName("Image embedding extractor")
         .outputMode("append")
-        .option("path", "output")
-        .option("checkpointLocation", "chk-point-dir/img_emb_extractor")
+
         .trigger(processingTime="1 minute")
         .start()
     )
+
+    # write to json for testing
+    # query = (
+    #     img_emb_df.writeStream
+    #     .format("json")
+    #     .queryName("Image embedding extractor")
+    #     .outputMode("append")
+    #     .option("path", "output")
+    #     .option("checkpointLocation", "chk-point-dir/img_emb_extractor")
+    #     .trigger(processingTime="1 minute")
+    #     .start()
+    # )
 
     query.awaitTermination()
