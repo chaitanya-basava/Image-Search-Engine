@@ -16,11 +16,13 @@ if __name__ == "__main__":
     predict = load_model_udf(spark)
     avroSchema = open("../schemas/flickr_image.avsc", "r").read()
 
+    topic_name = "flickr-images"
+
     df = (
         spark.readStream
         .format("kafka")
         .option("kafka.bootstrap.servers", "localhost:9092")
-        .option("subscribe", "flickr-images")
+        .option("subscribe", topic_name)
         .option("startingOffsets", "earliest")
         .load()
     )
@@ -43,7 +45,13 @@ if __name__ == "__main__":
         .format("org.elasticsearch.spark.sql")
         .queryName("Image embedding extractor")
         .outputMode("append")
-
+        .option("es.nodes", "localhost")
+        .option("es.port", "9200")
+        .option("es.nodes.discovery", "false")
+        .option("es.resource", f"{topic_name}")
+        .option("es.http.timeout", "30s")
+        .option("es.nodes.wan.only", "true") # needed to connect to specified node with http
+        .option("checkpointLocation", "chk-point-dir/img_emb_extractor-es")
         .trigger(processingTime="1 minute")
         .start()
     )

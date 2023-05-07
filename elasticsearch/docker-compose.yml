@@ -7,6 +7,7 @@ services:
       - elasticsearch-data:/usr/share/elasticsearch/data
     ports:
       - "9200:9200"
+      - "9600:9600"
     restart: always
     environment:
       - xpack.security.enabled=false
@@ -15,6 +16,8 @@ services:
       memlock:
         soft: -1
         hard: -1
+    env_file:
+      - ./spark.env
   kibana:
     depends_on:
       - elasticsearch

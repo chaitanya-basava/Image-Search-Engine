@@ -5,6 +5,7 @@ import requests
 import pandas as pd
 from PIL import Image
 from transformers import logging
+from torch.nn.functional import normalize
 from transformers import AutoProcessor, CLIPModel
 
 from pyspark.sql import SparkSession
@@ -26,7 +27,8 @@ class ClipImageEmbeddingModel(mlflow.pyfunc.PythonModel):
             images.append(Image.open(requests.get(row.to_list()[0], stream=True).raw))
 
         inputs = self.processor(images=images, return_tensors="pt")
-        image_embeds = self.model.get_image_features(**inputs).squeeze(0).cpu().detach().numpy().tolist()
+        outputs = normalize(self.model.get_image_features(**inputs), dim=1)
+        image_embeds = outputs.squeeze(0).cpu().detach().numpy().tolist()
 
         return pd.DataFrame(image_embeds)
 
@@ -56,4 +58,6 @@ if __name__ == '__main__':
         "https://farm66.staticflickr.com/65535/52743059408_a9eac98298_z.jpg",
         "https://farm66.staticflickr.com/65535/52743059408_a9eac98298_z.jpg"
     ])
-    print(model.predict(url).shape)
+    embeds = model.predict(url)
+    print(embeds.shape)
+    print(embeds)
