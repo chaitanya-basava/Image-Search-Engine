@@ -2,5 +2,5 @@
 
 run the spark application using following command (may update)
 ```
-spark-submit --master "local[3]" --deploy-mode client --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.4.0,org.apache.spark:spark-avro_2.12:3.4.0 main.py 
+spark-submit --master "local[3]" --deploy-mode client --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.4.0,org.apache.spark:spark-avro_2.12:3.4.0,org.elasticsearch:elasticsearch-spark-30_2.12:8.7.1 main.py 
 ```

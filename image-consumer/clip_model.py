@@ -15,7 +15,8 @@ logging.set_verbosity(40)
 
 
 class ClipImageEmbeddingModel(mlflow.pyfunc.PythonModel):
-    def __init__(self, model_name="clip-ViT-B-32"):
+    def __init__(self, model_name="clip-ViT-B-32", batch_size=32):
+        self.batch_size = batch_size
         self.model_name = model_name
         self.model = SentenceTransformer(model_name)
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -25,7 +26,13 @@ class ClipImageEmbeddingModel(mlflow.pyfunc.PythonModel):
         for row in df.iloc:
             images.append(Image.open(requests.get(row.to_list()[0], stream=True).raw))
 
-        image_embeds = self.model.encode(images, device=self.device, convert_to_tensor=True, normalize_embeddings=True)
+        image_embeds = self.model.encode(
+            images,
+            batch_size=self.batch_size,
+            device=self.device,
+            convert_to_numpy=True,
+            normalize_embeddings=True
+        )
 
         return pd.DataFrame(image_embeds.tolist())
 
