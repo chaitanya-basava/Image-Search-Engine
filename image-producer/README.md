@@ -9,6 +9,7 @@ This module includes the code used for fetching images from Flickr and push an a
 
 ### Run on local
 
+#### kafka self setup 
 1. Setup env variables in `.bash_profile` or `.zshrc`
 ```
 CONFLUENT_PATH="<PATH-TO-CONFLUENT-DIR>"
@@ -25,7 +26,22 @@ zookeeper-server-start $CONFLUENT_CONFIG_PATH/kafka/zookeeper.properties
 kafka-server-start $CONFLUENT_CONFIG_PATH/kafka/server.properties
 ```
 
-3. Create `flickr-images` (you may use any name of choice) topic using
+3. Start the schema registry using this cmd
+```
+schema-registry-start $CONFLUENT_CONFIG_PATH/schema-registry/schema-registry.properties
+```
+
+#### Kafka using docker-compose
+
+1. Run the `docker-compose.yml` file in [kafka](../kafka) folder.
+```
+docker-compose -f ../kafka/docker-compose.yml up
+```
+This will set up kafka, schema-registry and control center of confluent v7.4.0
+
+#### image producer
+
+1. Create `flickr-images` (you may use any name of choice) topic using
 ```
 kafka-topics --create --bootstrap-server localhost:9092 --replication-factor 1 --partitions 2 --topic flickr-images
 ```
@@ -41,17 +57,12 @@ Msg retention is set to 6hrs with max storage of 1GB. Check config using this cm
 kafka-configs --bootstrap-server localhost:9092 --entity-type topics --entity-name flickr-images --describe --all
 ```
 
-4. Start the schema registry using this cmd
-```
-schema-registry-start $CONFLUENT_CONFIG_PATH/schema-registry/schema-registry.properties
-```
-
-5. Run `mvn clean install`, this will generate the `FlickrImage` avro class, which is generated from the schema
+2. Run `mvn clean install`, this will generate the `FlickrImage` avro class, which is generated from the schema
 provided in `schemas` directory.
-6. Create `secrets.json` file inside [resources](src/main/resources) folder and pass Flickr's `API_KEY` and `SECRET`.
-7. Supply Kafka producer properties as a `{KAFKA_RUN_TYPE}.properties` file places inside `resources/kafka` dir.
+3. Create `secrets.json` file inside [resources](src/main/resources) folder and pass Flickr's `API_KEY` and `SECRET`.
+4. Supply Kafka producer properties as a `{KAFKA_RUN_TYPE}.properties` file places inside `resources/kafka` dir.
 View [local.properties](../kafka/local.properties) for reference.
-8. Execute the main method in Main class, this will start the producer.
+5. Execute the main method in Main class, this will start the producer.
 
 **NOTE:** Set `KAFKA_TOPIC_NAME` env variable if using a different topic name.
 
