@@ -2,7 +2,7 @@ from .conn import es
 from typing import List
 
 
-def search_embeddings(vector: List[float], index: str, source: List[str]):
+async def search_embeddings(vector: List[float], index: str, source: List[str]):
     knn_query = {
         "field": "image_emb",
         "query_vector": vector,
@@ -10,4 +10,5 @@ def search_embeddings(vector: List[float], index: str, source: List[str]):
         "num_candidates": 100
     }
 
-    return es.search(index=index, knn=knn_query, source=source)
+    res = await es.search(index=index, knn=knn_query, source=source)
+    return res["hits"]["hits"]

@@ -1,14 +1,18 @@
 import sys
-from elasticsearch import Elasticsearch
+from elasticsearch import AsyncElasticsearch
 
 
-es = Elasticsearch(
+es = AsyncElasticsearch(
     [{'host': 'localhost', 'port': 9200, 'scheme': 'http'}],
     basic_auth=("admin", "admin"),
     verify_certs=False
 )
 
-if not es.ping():
-    print("Couldn't connect to ES")
-    print(es.info())
-    sys.exit()
+
+async def check_connection():
+    if not await es.ping():
+        print("Couldn't connect to ES")
+        print(await es.info())
+        sys.exit()
+
+    return await es.ping()

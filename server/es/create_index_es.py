@@ -1,9 +1,10 @@
 import json
+import asyncio
 from conn import es
 from elasticsearch import Elasticsearch
 
 
-def create_index(_es: Elasticsearch, index_name: str, _schema: dict) -> bool:
+async def create_index(_es: Elasticsearch, index_name: str, _schema: dict) -> bool:
     index_setting = {
         "index": {
             "number_of_replicas": 0
@@ -31,9 +32,9 @@ def create_index(_es: Elasticsearch, index_name: str, _schema: dict) -> bool:
 
     created = False
     try:
-        if not _es.indices.exists(index=index_name):
-            _es.indices.create(index=index_name, settings=index_setting, mappings=index_body)
-            print(f"{index_name} created - {_es.indices.exists(index=index_name)}")
+        if not await _es.indices.exists(index=index_name):
+            await _es.indices.create(index=index_name, settings=index_setting, mappings=index_body)
+            print(f"{index_name} created - {await _es.indices.exists(index=index_name)}")
             created = True
         else:
             print("Already created!!")
@@ -60,4 +61,5 @@ def parse_avro(path: str) -> dict:
 
 if __name__ == '__main__':
     schema = parse_avro("../../schemas/flickr_image.avsc")
-    index_created = create_index(es, "flickr-images", schema)
+    index_created = asyncio.run(create_index(es, "flickr-images", schema))
+    print(index_created)
