@@ -1,0 +1,5 @@
+ftfy==6.1.1
+Flask==2.3.2
+transformers==4.24.0
+elasticsearch==8.7.0
+sentence-transformers==2.2.2

@@ -5,7 +5,7 @@ from elasticsearch import Elasticsearch
 
 def create_index(_es: Elasticsearch, index_name: str, _schema: dict) -> bool:
     index_setting = {
-        "index" : {
+        "index": {
             "number_of_replicas": 0
         }
     }
@@ -59,5 +59,5 @@ def parse_avro(path: str) -> dict:
 
 
 if __name__ == '__main__':
-    schema = parse_avro("../schemas/flickr_image.avsc")
+    schema = parse_avro("../../schemas/flickr_image.avsc")
     index_created = create_index(es, "flickr-images", schema)
