@@ -29,14 +29,15 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        if(args.length == 0) {
-            throw new RuntimeException("pass kafka properties file path");
+        if(args.length != 2) {
+            throw new RuntimeException("pass kafka properties and tags cache json files path");
         }
 
         String kafkaPropertiesFilePath = args[0];
+        String cachePath = args[1];
 
         Map<String, String> secrets = Main.getSecrets();
-        FlickrExtractor extractor = new FlickrExtractor(secrets);
+        FlickrExtractor extractor = new FlickrExtractor(secrets, cachePath);
 
         try(
                 KafkaProducerManager<FlickrImage> producerManager =

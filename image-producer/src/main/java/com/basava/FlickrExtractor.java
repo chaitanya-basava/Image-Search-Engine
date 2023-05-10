@@ -25,17 +25,10 @@ public class FlickrExtractor {
     private final Flickr flickr;
     private final Map<String, Integer> tagCounts;
     private final Logger logger = LoggerFactory.getLogger(FlickrExtractor.class);
-    private final String cachePath =
-            new File(
-                    FlickrExtractor.class
-                            .getProtectionDomain()
-                            .getCodeSource()
-                            .getLocation()
-                            .getPath()
-            ).getAbsolutePath().replace("target/classes", "src/main/resources")
-                    + "/cache/tags.json";
+    private final String cachePath;
 
-    FlickrExtractor(Map<String, String> secrets) {
+    FlickrExtractor(Map<String, String> secrets, String cachePath) {
+        this.cachePath = cachePath;
         this.flickr = new Flickr(secrets.get("API_KEY"), secrets.get("SECRET"), new REST());
         this.tagCounts = this.loadTagsCache();
     }
