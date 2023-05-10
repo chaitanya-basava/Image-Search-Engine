@@ -57,13 +57,17 @@ Msg retention is set to 6hrs with max storage of 1GB. Check config using this cm
 kafka-configs --bootstrap-server localhost:9092 --entity-type topics --entity-name flickr-images --describe --all
 ```
 2. Create `secrets.json` file inside [resources](src/main/resources) folder and pass Flickr's `API_KEY` and `SECRET`.
-3. Run `mvn clean install`, this will generate the `FlickrImage` avro class, which is generated from the schema
-provided in `schemas` directory.
+3. Run `mvn clean package`, this will generate the `FlickrImage` avro class, which is generated from the schema
+provided in `schemas` directory and also generates tje necessary jar file in `target` directory.
 4. Build a jar of the [image-producer](./README.md) project
 5. Run the application by supplying the respective kafka properties (ex: [local.properties](../kafka/local.properties))
 and `tags.json` files (ex: [tags.json](../cache/tags.json))
 ```
 java -jar <path to jar> <path to kafka properties> <path to tags.json>
+```
+You can use this cmd when executed from root directory of this project
+```
+java -jar ./image-producer/target/image-producer-1.0-SNAPSHOT-jar-with-dependencies.jar "./kafka/local.properties" "./cache/tags.json"
 ```
 
 **NOTE:** Set `KAFKA_TOPIC_NAME` env variable if using a different topic name from `flickr-images`.
