@@ -35,7 +35,7 @@ schema-registry-start $CONFLUENT_CONFIG_PATH/schema-registry/schema-registry.pro
 
 1. Run the `docker-compose.yml` file in [kafka](../kafka) folder.
 ```
-docker-compose -f ../kafka/docker-compose.yml up
+RESOURCE_HOST_URL=localhost docker-compose -f ./kafka/docker-compose.yml up -d
 ```
 This will set up kafka, schema-registry and control center of confluent v7.4.0
 
