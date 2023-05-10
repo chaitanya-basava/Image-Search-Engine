@@ -29,12 +29,18 @@ public class Main {
     }
 
     public static void main(String[] args) {
+        if(args.length == 0) {
+            throw new RuntimeException("pass kafka properties file path");
+        }
+
+        String kafkaPropertiesFilePath = args[0];
+
         Map<String, String> secrets = Main.getSecrets();
         FlickrExtractor extractor = new FlickrExtractor(secrets);
 
         try(
                 KafkaProducerManager<FlickrImage> producerManager =
-                        new KafkaProducerManager<>(System.getenv("KAFKA_RUN_TYPE"))
+                        new KafkaProducerManager<>(kafkaPropertiesFilePath)
         ) {
             List<FlickrImage> images = extractor.extract();
             // images.forEach(image -> logger.info(image.toString()));

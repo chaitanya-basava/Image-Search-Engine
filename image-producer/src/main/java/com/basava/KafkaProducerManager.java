@@ -6,7 +6,6 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Properties;
@@ -14,17 +13,7 @@ import java.util.Properties;
 public class KafkaProducerManager<T> implements AutoCloseable {
     final Producer<String, T> producer;
 
-    KafkaProducerManager(String kafkaRunType) {
-        // TODO: make path more dynamic
-        String path =
-                new File(
-                        KafkaProducerManager.class
-                                .getProtectionDomain()
-                                .getCodeSource()
-                                .getLocation()
-                                .getPath()
-                ).getAbsolutePath() + String.format("/../../../kafka/%s.properties", kafkaRunType);
-
+    KafkaProducerManager(String path) {
         Properties kafkaProps = new Properties();
         kafkaProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         kafkaProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class.getName());
