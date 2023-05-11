@@ -1,22 +1,25 @@
 import uvicorn
-from typing import Union
-from pydantic import BaseModel
 from fastapi import FastAPI, HTTPException
 
 from model import EmbeddingModel
 from es.query import search_embeddings
-
+from config import get_settings, Query
+from es.conn import create_conn, check_connection
 
 app = FastAPI()
+
+# load env variables
+settings = get_settings()
+
+# create es connection
+print(check_connection(settings.es_host, settings.es_port))
+es = create_conn(settings.es_host, settings.es_port)
+
+# load model
 model = EmbeddingModel()
 
-index = "flickr-images"
-img_url_prefix = "https://farm66.staticflickr.com/"
-
-
-class Query(BaseModel):
-    phrase: Union[str, None]
-    image: Union[str, None]
+# warm up call to model
+print(f"warm up model call, embedding size: {len(model.extract_text_embeddings('give me embeddings'))}")
 
 
 @app.post("/text_search")
@@ -26,7 +29,7 @@ async def get_similar_images_text(query: Query):
 
     emb = model.extract_text_embeddings(query.phrase)
     try:
-        res = await search_embeddings(emb, index=index, source=["imgUrl", "title"])
+        res = await search_embeddings(es, emb, index=settings.es_index, source=["imgUrl", "title"])
         return res
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -44,13 +47,11 @@ async def get_similar_images(query: Query):
         raise HTTPException(status_code=500, detail=msg)
 
     try:
-        res = await search_embeddings(emb, index=index, source=["imgUrl", "title"])
+        res = await search_embeddings(es, emb, index=settings.es_index, source=["imgUrl", "title"])
         return res
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
 if __name__ == '__main__':
-    # warm up call to model
-    print(len(model.extract_text_embeddings("sky")))
     uvicorn.run(app, host="0.0.0.0", port=80)

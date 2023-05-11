@@ -1,18 +1,26 @@
 import sys
-from elasticsearch import AsyncElasticsearch
+from functools import lru_cache
+from elasticsearch import AsyncElasticsearch, Elasticsearch
 
 
-es = AsyncElasticsearch(
-    [{'host': 'localhost', 'port': 9200, 'scheme': 'http'}],
-    basic_auth=("admin", "admin"),
-    verify_certs=False
-)
+@lru_cache()
+def create_conn(es_host: str = "localhost", es_port: int = 9200) -> AsyncElasticsearch:
+    return AsyncElasticsearch(
+        [{'host': es_host, 'port': es_port, 'scheme': 'http'}],
+        basic_auth=("admin", "admin"),
+        verify_certs=False
+    )
 
 
-async def check_connection():
-    if not await es.ping():
-        print("Couldn't connect to ES")
-        print(await es.info())
+def check_connection(es_host: str = "localhost", es_port: int = 9200):
+    es = Elasticsearch(
+        [{'host': es_host, 'port': es_port, 'scheme': 'http'}],
+        basic_auth=("admin", "admin"),
+        verify_certs=False
+    )
+    ping = es.ping()
+    if not ping:
+        print(es.info())
         sys.exit()
 
-    return await es.ping()
+    return f"Connected to ES at {es_host}:{es_port}"

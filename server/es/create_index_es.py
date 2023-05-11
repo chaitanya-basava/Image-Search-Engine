@@ -1,10 +1,10 @@
 import json
 import asyncio
-from conn import es
-from elasticsearch import Elasticsearch
+from conn import create_conn
+from elasticsearch import AsyncElasticsearch
 
 
-async def create_index(_es: Elasticsearch, index_name: str, _schema: dict) -> bool:
+async def create_index(_es: AsyncElasticsearch, index_name: str, _schema: dict) -> bool:
     index_setting = {
         "index": {
             "number_of_replicas": 0
@@ -61,5 +61,6 @@ def parse_avro(path: str) -> dict:
 
 if __name__ == '__main__':
     schema = parse_avro("../../schemas/flickr_image.avsc")
+    es = create_conn()
     index_created = asyncio.run(create_index(es, "flickr-images", schema))
     print(index_created)

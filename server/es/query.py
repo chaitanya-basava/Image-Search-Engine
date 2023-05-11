@@ -1,8 +1,7 @@
-from .conn import es
 from typing import List
 
 
-async def search_embeddings(vector: List[float], index: str, source: List[str]):
+async def search_embeddings(es, vector: List[float], index: str, source: List[str]):
     knn_query = {
         "field": "image_emb",
         "query_vector": vector,
