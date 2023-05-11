@@ -35,3 +35,7 @@ class EmbeddingModel:
     def __image_embedding(self, image: Image) -> List[float]:
         image_emds = self.model.encode(image, convert_to_numpy=True, normalize_embeddings=True)
         return image_emds.tolist()
+
+
+if __name__ == '__main__':
+    model = EmbeddingModel()
