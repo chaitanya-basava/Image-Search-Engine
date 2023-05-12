@@ -5,7 +5,6 @@ import com.flickr4java.flickr.Flickr;
 import com.flickr4java.flickr.people.User;
 import com.flickr4java.flickr.photos.Photo;
 import com.flickr4java.flickr.FlickrException;
-import com.flickr4java.flickr.photos.PhotoList;
 import com.flickr4java.flickr.people.PeopleInterface;
 import com.flickr4java.flickr.photos.PhotosInterface;
 import com.flickr4java.flickr.photos.SearchParameters;
@@ -51,9 +50,7 @@ public class FlickrExtractor {
             params.setTags(key.split("_"));
             params.setTagMode("any");
 
-            PhotoList<Photo> photos = photosInterface.search(params, n, page);
-            photos.forEach(photo ->
-            {
+            photosInterface.search(params, n, page).forEach(photo -> {
                 try {
                     if (photo.getMedium640Url() == null)
                         throw new FlickrException("Medium640 url can't be null");
