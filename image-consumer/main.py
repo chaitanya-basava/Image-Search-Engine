@@ -75,6 +75,7 @@ if __name__ == "__main__":
         es_stream_sink
         .queryName("Image embedding extractor")
         .outputMode("append")
+        .option("es.mapping.id", "id")
         .option("es.nodes.discovery", "false")
         .option("es.resource", f"{topic_name}")
         .option("es.nodes.wan.only", "true")  # needed to connect to specified node with http

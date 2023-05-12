@@ -10,6 +10,7 @@ import com.flickr4java.flickr.people.PeopleInterface;
 import com.flickr4java.flickr.photos.PhotosInterface;
 import com.flickr4java.flickr.photos.SearchParameters;
 
+import com.flickr4java.flickr.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,6 +18,8 @@ import java.io.*;
 import java.util.*;
 import java.nio.file.Paths;
 import java.nio.file.Files;
+import java.util.stream.Collectors;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
 
@@ -27,13 +30,14 @@ public class FlickrExtractor {
     private final Logger logger = LoggerFactory.getLogger(FlickrExtractor.class);
     private final String cachePath;
 
-    FlickrExtractor(Map<String, String> secrets, String cachePath) {
+    FlickrExtractor(String cachePath) {
+        Map<String, String> secrets = this.getSecrets();
         this.cachePath = cachePath;
         this.flickr = new Flickr(secrets.get("API_KEY"), secrets.get("SECRET"), new REST());
         this.tagCounts = this.loadTagsCache();
     }
 
-    List<FlickrImage> extract() {
+    List<FlickrImage> extract(int n) {
         String key = this.getRandomTagKey();
         int page = this.tagCounts.get(key);
         ArrayList<FlickrImage> flickrImages = new ArrayList<>();
@@ -41,21 +45,24 @@ public class FlickrExtractor {
         PhotosInterface photosInterface = flickr.getPhotosInterface();
         PeopleInterface peopleInterface = flickr.getPeopleInterface();
 
-        try{
+        try {
             SearchParameters params = new SearchParameters();
             params.setMedia("photos");
             params.setTags(key.split("_"));
             params.setTagMode("any");
 
-            PhotoList<Photo> photos = photosInterface.search(params, 10, page);
+            PhotoList<Photo> photos = photosInterface.search(params, n, page);
             photos.forEach(photo ->
             {
                 try {
-                    if(photo.getMedium640Url() == null)
+                    if (photo.getMedium640Url() == null)
                         throw new FlickrException("Medium640 url can't be null");
 
                     User user = peopleInterface.getInfo(photo.getOwner().getId());
                     Photo photoDetails = photosInterface.getInfo(photo.getId(), null);
+                    List<CharSequence> tags = photoDetails.getTags()
+                            .stream().map(Tag::getValue)
+                            .collect(Collectors.toList());
 
                     String[] userUrlId = user.getProfileurl().split("/");
                     String[] imgUrl = photo.getMedium640Url().split("/");
@@ -66,6 +73,7 @@ public class FlickrExtractor {
                             .setImgUrl(imgUrl[3] + "/" + imgUrl[4])
                             .setUserUrlId(userUrlId[userUrlId.length - 1])
                             .setPostedOn(photoDetails.getDatePosted().getTime())
+                            .setTags(tags)
                             .build();
 
                     flickrImages.add(image);
@@ -80,6 +88,12 @@ public class FlickrExtractor {
         }
 
         return flickrImages;
+    }
+
+    // for testing FlickrExtractor class
+    public static void main(String[] args) {
+        FlickrExtractor extractor = new FlickrExtractor(args[0]);
+        System.out.println(extractor.extract(1));
     }
 
     private String getRandomTagKey() {
@@ -114,6 +128,19 @@ public class FlickrExtractor {
             file.close();
 
             logger.info("[UPDATED] tags at " + cachePath);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private Map<String, String> getSecrets() {
+        InputStream inputStream = FlickrExtractor.class.getClassLoader().getResourceAsStream("secrets.json");
+        ObjectMapper objectMapper = new ObjectMapper();
+        TypeReference<Map<String, String>> typeReference = new TypeReference<Map<String, String>>() {
+        };
+
+        try {
+            return objectMapper.readValue(inputStream, typeReference);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

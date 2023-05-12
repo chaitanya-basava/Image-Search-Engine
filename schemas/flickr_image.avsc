@@ -3,10 +3,33 @@
   "type": "record",
   "name": "FlickrImage",
   "fields": [
-    {"name": "title", "type": "string"},
-    {"name": "id", "type": "string"},
-    {"name": "imgUrl", "type": "string"},
-    {"name": "userUrlId", "type": "string"},
-    {"name":  "postedOn", "type": "long"}
+    {
+      "name": "title",
+      "type": "string"
+    },
+    {
+      "name": "id",
+      "type": "string"
+    },
+    {
+      "name": "imgUrl",
+      "type": "string"
+    },
+    {
+      "name": "userUrlId",
+      "type": "string"
+    },
+    {
+      "name": "postedOn",
+      "type": "long"
+    },
+    {
+      "name": "tags",
+      "type": {
+        "type": "array",
+        "items": "string",
+        "default": []
+      }
+    }
   ]
 }

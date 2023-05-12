@@ -51,7 +51,7 @@ def parse_avro(path: str) -> dict:
     for field in avro_fields:
         _type = field["type"]
 
-        if _type == "string":
+        if _type == "string" or field["name"] == "tags":
             _type = "text"
 
         _schema[field["name"]] = {"type": _type}
