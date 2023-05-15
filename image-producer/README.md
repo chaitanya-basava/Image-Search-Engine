@@ -63,7 +63,7 @@ provided in `schemas` directory and also generates tje necessary jar file in `ta
 5. Run the application by supplying the respective kafka properties (ex: [local.properties](../kafka/local.properties))
 and `tags.json` files (ex: [tags.json](../cache/tags.json))
 ```
-java -jar <path to jar> <path to kafka properties> <path to tags.json>
+java -jar <path to jar> -kp <path to kafka properties> -c <path to tags.json> -k 10
 ```
 You can use this cmd when executed from root directory of this project
 ```

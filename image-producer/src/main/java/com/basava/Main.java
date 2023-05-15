@@ -1,5 +1,6 @@
 package com.basava;
 
+import org.apache.commons.cli.*;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,21 +12,47 @@ public class Main {
     private static final String KAFKA_TOPIC_NAME = System.getenv()
             .getOrDefault("KAFKA_TOPIC_NAME", "flickr-images");
 
-    public static void main(String[] args) {
-        if (args.length < 2) {
-            throw new RuntimeException("pass kafka properties and tags cache json files path");
+    private static CommandLine parseArgs(String[] args) {
+        Options options = new Options();
+
+        Option kafkaProperties = new Option("kp", "kafkaProperties", true, "Kafka properties file path");
+        kafkaProperties.setRequired(true);
+        options.addOption(kafkaProperties);
+
+        Option cacheFile = new Option("c", "cacheFile", true, "Kafka properties file path");
+        kafkaProperties.setRequired(true);
+        options.addOption(cacheFile);
+
+        Option k = new Option("k", "iterations", true, "Number of iterations");
+        options.addOption(k);
+
+        CommandLineParser parser = new DefaultParser();
+        HelpFormatter formatter = new HelpFormatter();
+
+        try {
+            return parser.parse(options, args);
+        } catch (ParseException e) {
+            System.out.println(e.getMessage());
+            formatter.printHelp("utility-name", options);
+
+            System.exit(1);
         }
 
-        String kafkaPropertiesFilePath = args[0];
-        String cachePath = args[1];
+        return null;
+    }
 
-        int k;
-        if (args.length == 3) {
-            k = Integer.parseInt(args[2]);
-        } else {
-            k = 10;
+    public static void main(String[] args) {
+        CommandLine cmd = Main.parseArgs(args);
+        String kafkaPropertiesFilePath = cmd.getOptionValue("kafkaProperties");
+        String cachePath = cmd.getOptionValue("cacheFile");
+        int k = cmd.hasOption("k") ? Integer.parseInt(cmd.getOptionValue("k")) : 10;
+
+        if (k <= 0) {
+            throw new IllegalArgumentException("k must be positive");
         }
         logger.info(String.format("Will be iterating for %d iterations.", k));
+        logger.info(kafkaPropertiesFilePath);
+        logger.info(cachePath);
 
         FlickrExtractor extractor = new FlickrExtractor(cachePath);
 
