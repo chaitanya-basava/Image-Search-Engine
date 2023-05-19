@@ -79,12 +79,11 @@ public class Main {
                         }
                     });
                 });
+                producerManager.producer.flush();
 
                 logger.info(String.format("uploaded %d records in iteration %d", msgsUploaded[0], iteration));
                 iteration++;
             }
-
-            producerManager.producer.flush();
         } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {
