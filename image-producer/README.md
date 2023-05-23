@@ -67,7 +67,7 @@ java -jar <path to jar> -kp <path to kafka properties> -c <path to tags.json> -k
 ```
 You can use this cmd when executed from root directory of this project
 ```
-java -jar ./image-producer/target/image-producer-1.0-SNAPSHOT-jar-with-dependencies.jar "./kafka/local.properties" "./cache/tags.json"
+java -jar ./image-producer/target/image-producer-1.0-SNAPSHOT-jar-with-dependencies.jar -kp "./kafka/local.properties" -c "./cache/tags.json"
 ```
 
 **NOTE:** Set `KAFKA_TOPIC_NAME` env variable if using a different topic name from `flickr-images`.

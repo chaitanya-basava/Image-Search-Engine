@@ -60,16 +60,15 @@ public class Main {
                 KafkaProducerManager<FlickrImage> producerManager =
                         new KafkaProducerManager<>(kafkaPropertiesFilePath)
         ) {
-            int iteration = 0;
+            int iteration = 1;
             final int[] msgsUploaded = {0};
 
-            while (iteration < k) {
+            while (iteration <= k) {
                 List<FlickrImage> images = extractor.extract(10);
 
                 images.forEach(image -> {
-                    ProducerRecord<String, FlickrImage> imageRecord = new ProducerRecord<>(
-                            Main.KAFKA_TOPIC_NAME, image.getId().toString(), image
-                    );
+                    ProducerRecord<String, FlickrImage> imageRecord =
+                            new ProducerRecord<>(Main.KAFKA_TOPIC_NAME, image.getId().toString(), image);
 
                     producerManager.producer.send(imageRecord, (recordMetadata, e) -> {
                         if (e != null) {
