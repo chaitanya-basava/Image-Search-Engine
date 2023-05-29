@@ -1,12 +1,6 @@
-import classNames from 'classnames';
-
 import InputBase from '@mui/material/InputBase';
 import SearchIcon from '@mui/icons-material/Search';
 import { styled, alpha } from '@mui/material/styles';
-
-export interface SearchBarProps {
-    className?: string;
-}
 
 const Search = styled('div')(({ theme }) => ({
     position: 'relative',
@@ -43,7 +37,7 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
         transition: theme.transitions.create('width'),
         width: '100%',
         [theme.breakpoints.up('md')]: {
-            width: '20ch',
+            width: '80ch',
         },
     },
 }));
@@ -53,7 +47,7 @@ function enterPressed(event: any) {
     var phrase = event.target.value;
     if (code === 13 && phrase.length > 2) {
         alert(phrase);
-        event.target.value = "";
+        event.target.value = '';
     }
 }
 
@@ -61,7 +55,7 @@ function enterPressed(event: any) {
  * This component was created using Codux's Default new component template.
  * To create custom component templates, see https://help.codux.com/kb/en/article/kb16522
  */
-export const SearchBar = ({ className }: SearchBarProps) => {
+export const SearchBar = () => {
     return (
         <Search>
             <SearchIconWrapper>
