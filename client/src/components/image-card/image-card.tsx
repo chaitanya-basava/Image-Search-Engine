@@ -1,8 +1,8 @@
-import Card from '@mui/material/Card';
-import CardMedia from '@mui/material/CardMedia';
-import Typography from '@mui/material/Typography';
-import CardContent from '@mui/material/CardContent';
-import { Button, CardActionArea, CardActions } from '@mui/material';
+import { Link, Typography } from '@mui/material';
+import InfoIcon from '@mui/icons-material/Info';
+import IconButton from '@mui/material/IconButton';
+import ImageListItem from '@mui/material/ImageListItem';
+import ImageListItemBar from '@mui/material/ImageListItemBar';
 
 export interface ImageCardProps {
     title: string;
@@ -18,35 +18,43 @@ export interface ImageCardProps {
  */
 export const ImageCard = (props: ImageCardProps) => {
     var date = new Date(props.postedOn);
+    var subtitleComp = (
+        <div>
+            by <Link color="white" variant="overline" href={`http://www.flickr.com/people/${props.userId}`} underline="hover">
+                @{props.userName}
+            </Link>
+            <br></br>
+            {date.toDateString()} {date.toLocaleTimeString()}
+        </div>
+    )
+
+    var titleComp = (
+        <Typography gutterBottom variant="h4" component="div">
+            {props.title}
+        </Typography>
+    )
+
     return (
-        <Card sx={{ maxWidth: 345, height: 525 }}>
-            <CardActionArea>
-                <CardMedia
-                    component="img"
-                    height="300"
-                    image={`https://farm66.staticflickr.com/${props.imgUrl}`}
-                    alt="flickr image"
-                />
-                <CardContent>
-                    <Typography gutterBottom variant="h4" component="div">
-                        {props.title}
-                    </Typography>
-                    <Typography variant="button" color="text.secondary">
-                        Image captured by {props.userName}.
-                        <br></br>
-                        {date.toDateString()} {date.toLocaleTimeString()}
-                        <br></br>
-                    </Typography>
-                </CardContent>
-            </CardActionArea>
-            <CardActions>
-                <Button size="small" color="primary" href={`http://www.flickr.com/people/${props.userId}`}>
-                    Profile
-                </Button>
-                <Button size="small" color="primary" href={`http://www.flickr.com/photos/${props.userId}`}>
-                    Photos
-                </Button>
-            </CardActions>
-        </Card>
+        <ImageListItem key={props.imgUrl}>
+          <img
+            src={`https://farm66.staticflickr.com/${props.imgUrl}`}
+            srcSet={`https://farm66.staticflickr.com/${props.imgUrl}`}
+            alt={props.title}
+            loading="lazy"
+          />
+          <ImageListItemBar
+            title={titleComp}
+            subtitle={subtitleComp}
+            actionIcon={
+              <IconButton
+                sx={{ color: 'rgba(255, 255, 255, 0.84)' }}
+                aria-label={`more photos by ${props.userName}`}
+                href={`http://www.flickr.com/photos/${props.userId}`}
+              >
+                <InfoIcon />
+              </IconButton>
+            }
+          />
+        </ImageListItem>
     );
 };
