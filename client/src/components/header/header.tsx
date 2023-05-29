@@ -6,6 +6,7 @@ import IconButton from '@mui/material/IconButton';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import { SearchBar } from '../search-bar/search-bar';
 import LinkedInIcon from '@mui/icons-material/LinkedIn';
+import FileUploadIcon from '@mui/icons-material/FileUpload';
 
 /**
  * This component was created using Codux's Default new component template.
@@ -22,9 +23,8 @@ export const Header = () => {
                         component="div"
                         sx={{ flexGrow: 1, display: { xs: 'none', sm: 'block' } }}
                         align="inherit"
-                        paddingRight={5}
                     >
-                        Image Search
+                        Image Search Engine Demo
                     </Typography>
                     <SearchBar />
                     <IconButton

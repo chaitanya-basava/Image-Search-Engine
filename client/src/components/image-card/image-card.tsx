@@ -20,41 +20,47 @@ export const ImageCard = (props: ImageCardProps) => {
     var date = new Date(props.postedOn);
     var subtitleComp = (
         <div>
-            by <Link color="white" variant="overline" href={`http://www.flickr.com/people/${props.userId}`} underline="hover">
+            by{' '}
+            <Link
+                color="white"
+                variant="overline"
+                href={`http://www.flickr.com/people/${props.userId}`}
+                underline="hover"
+            >
                 @{props.userName}
             </Link>
             <br></br>
             {date.toDateString()} {date.toLocaleTimeString()}
         </div>
-    )
+    );
 
     var titleComp = (
-        <Typography gutterBottom variant="h4" component="div">
-            {props.title}
+        <Typography gutterBottom variant="body1" component="div" mt={0}>
+            <h4>{props.title}</h4>
         </Typography>
-    )
+    );
 
     return (
-        <ImageListItem key={props.imgUrl}>
-          <img
-            src={`https://farm66.staticflickr.com/${props.imgUrl}`}
-            srcSet={`https://farm66.staticflickr.com/${props.imgUrl}`}
-            alt={props.title}
-            loading="lazy"
-          />
-          <ImageListItemBar
-            title={titleComp}
-            subtitle={subtitleComp}
-            actionIcon={
-              <IconButton
-                sx={{ color: 'rgba(255, 255, 255, 0.84)' }}
-                aria-label={`more photos by ${props.userName}`}
-                href={`http://www.flickr.com/photos/${props.userId}`}
-              >
-                <InfoIcon />
-              </IconButton>
-            }
-          />
+        <ImageListItem sx={{ width: 500, height: 350 }}>
+            <img
+                src={`https://farm66.staticflickr.com/${props.imgUrl}`}
+                srcSet={`https://farm66.staticflickr.com/${props.imgUrl}`}
+                alt={props.title}
+                loading="lazy"
+            />
+            <ImageListItemBar
+                title={titleComp}
+                subtitle={subtitleComp}
+                actionIcon={
+                    <IconButton
+                        sx={{ color: 'rgba(255, 255, 255, 0.84)' }}
+                        aria-label={`more photos by ${props.userName}`}
+                        href={`http://www.flickr.com/photos/${props.userId}`}
+                    >
+                        <InfoIcon />
+                    </IconButton>
+                }
+            />
         </ImageListItem>
     );
 };
