@@ -24,10 +24,6 @@
       "type": "string"
     },
     {
-      "name": "description",
-      "type": "string"
-    },
-    {
       "name": "postedOn",
       "type": "long"
     },

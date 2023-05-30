@@ -3,7 +3,6 @@ package com.basava;
 import com.flickr4java.flickr.REST;
 import com.flickr4java.flickr.Flickr;
 import com.flickr4java.flickr.people.User;
-import com.flickr4java.flickr.photos.Photo;
 import com.flickr4java.flickr.FlickrException;
 import com.flickr4java.flickr.people.PeopleInterface;
 import com.flickr4java.flickr.photos.PhotosInterface;
@@ -28,12 +27,17 @@ public class FlickrExtractor {
     private final Map<String, Integer> tagCounts;
     private final Logger logger = LoggerFactory.getLogger(FlickrExtractor.class);
     private final String cachePath;
+    private final Set<String> extras;
 
     FlickrExtractor(String cachePath) {
         Map<String, String> secrets = this.getSecrets();
         this.cachePath = cachePath;
         this.flickr = new Flickr(secrets.get("API_KEY"), secrets.get("SECRET"), new REST());
         this.tagCounts = this.loadTagsCache();
+
+        this.extras = new LinkedHashSet<>();
+        this.extras.add("date_upload");
+        this.extras.add("tags");
     }
 
     List<FlickrImage> extract(int n) {
@@ -49,18 +53,18 @@ public class FlickrExtractor {
             params.setMedia("photos");
             params.setTags(key.split("_"));
             params.setTagMode("any");
+            params.setExtras(this.extras);
 
             photosInterface.search(params, n, page).forEach(photo -> {
                 try {
                     if (photo.getMedium640Url() == null)
                         throw new FlickrException("Medium640 url can't be null");
 
-                    User user = peopleInterface.getInfo(photo.getOwner().getId());
-                    Photo photoDetails = photosInterface.getInfo(photo.getId(), null);
-                    List<CharSequence> tags = photoDetails.getTags()
+                    List<CharSequence> tags = photo.getTags()
                             .stream().map(Tag::getValue)
                             .collect(Collectors.toList());
 
+                    User user = peopleInterface.getInfo(photo.getOwner().getId());
                     String[] userId = user.getProfileurl().split("/");
                     String[] imgUrl = photo.getMedium640Url().split("/");
 
@@ -70,8 +74,7 @@ public class FlickrExtractor {
                             .setImgUrl(imgUrl[3] + "/" + imgUrl[4])
                             .setUserId(userId[userId.length - 1])
                             .setUserName(user.getUsername())
-                            .setDescription(photoDetails.getDescription())
-                            .setPostedOn(photoDetails.getDatePosted().getTime())
+                            .setPostedOn(photo.getDatePosted().getTime())
                             .setTags(tags)
                             .build();
 
