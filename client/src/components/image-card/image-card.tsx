@@ -25,6 +25,7 @@ export const ImageCard = (props: ImageCardProps) => {
                 color="white"
                 variant="overline"
                 href={`http://www.flickr.com/people/${props.userId}`}
+                target="_blank"
                 underline="hover"
             >
                 @{props.userName}
@@ -56,6 +57,7 @@ export const ImageCard = (props: ImageCardProps) => {
                         sx={{ color: 'rgba(255, 255, 255, 0.84)' }}
                         aria-label={`more photos by ${props.userName}`}
                         href={`http://www.flickr.com/photos/${props.userId}`}
+                        target="_blank"
                     >
                         <InfoIcon />
                     </IconButton>

@@ -1,5 +1,7 @@
+import React from 'react';
 import { Header } from './components/header/header';
 import { ResultsContainer } from './components/results-container/results-container';
+import { ImageCardProps } from './components/image-card/image-card';
 
 var example = [
     {
@@ -46,13 +48,48 @@ var example = [
     },
 ];
 
-function App() {
-    return (
-        <div>
-            <Header />
-            <ResultsContainer cards={example} />
-        </div>
-    );
+interface AppState {
+    cards: Array<ImageCardProps>;
+}
+
+class App extends React.Component<{}, AppState> {
+    constructor(props: {}) {
+        super(props);
+        this.state = {
+            cards: [],
+        };
+    }
+
+    search = (event: any) => {
+        var code = event.keyCode || event.which;
+        var phrase = event.target.value;
+        if (code === 13 && phrase.length > 2) {
+            alert(phrase);
+            event.target.value = '';
+            this.setState((state) => ({
+                cards: example,
+            }));
+        }
+    };
+
+    clearResults = () => {
+        this.setState((state) => ({
+            cards: [],
+        }));
+    };
+
+    render(): React.ReactNode {
+        return (
+            <div>
+                <Header
+                    search={this.search}
+                    clear={this.clearResults}
+                    displayClear={this.state.cards.length !== 0}
+                />
+                <ResultsContainer cards={this.state.cards} />
+            </div>
+        );
+    }
 }
 
 export default App;
