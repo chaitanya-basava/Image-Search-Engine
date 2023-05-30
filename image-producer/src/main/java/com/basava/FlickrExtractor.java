@@ -61,14 +61,16 @@ public class FlickrExtractor {
                             .stream().map(Tag::getValue)
                             .collect(Collectors.toList());
 
-                    String[] userUrlId = user.getProfileurl().split("/");
+                    String[] userId = user.getProfileurl().split("/");
                     String[] imgUrl = photo.getMedium640Url().split("/");
 
                     FlickrImage image = FlickrImage.newBuilder()
                             .setTitle(photo.getTitle())
                             .setId(photo.getId())
                             .setImgUrl(imgUrl[3] + "/" + imgUrl[4])
-                            .setUserUrlId(userUrlId[userUrlId.length - 1])
+                            .setUserId(userId[userId.length - 1])
+                            .setUserName(user.getUsername())
+                            .setDescription(photoDetails.getDescription())
                             .setPostedOn(photoDetails.getDatePosted().getTime())
                             .setTags(tags)
                             .build();

@@ -47,7 +47,11 @@ async def get_similar_images(query: Query):
         raise HTTPException(status_code=500, detail=msg)
 
     try:
-        res = await search_embeddings(es, emb, index=settings.es_index, source=["imgUrl", "title"])
+        res = await search_embeddings(
+            es, emb,
+            index=settings.es_index,
+            source=["imgUrl", "title", "userId", "userName", "postedOn"]
+        )
         return res
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

@@ -16,7 +16,15 @@
       "type": "string"
     },
     {
-      "name": "userUrlId",
+      "name": "userId",
+      "type": "string"
+    },
+    {
+      "name": "userName",
+      "type": "string"
+    },
+    {
+      "name": "description",
       "type": "string"
     },
     {
