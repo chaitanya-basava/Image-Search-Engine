@@ -1,5 +1,6 @@
 import uvicorn
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 
 from model import EmbeddingModel
 from es.query import search_embeddings
@@ -7,6 +8,12 @@ from config import get_settings, Query
 from es.conn import create_conn, check_connection
 
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=['*'],
+    allow_methods=["POST"],
+    allow_headers=["*"],
+)
 
 # load env variables
 settings = get_settings()
@@ -29,7 +36,11 @@ async def get_similar_images_text(query: Query):
 
     emb = model.extract_text_embeddings(query.phrase)
     try:
-        res = await search_embeddings(es, emb, index=settings.es_index, source=["imgUrl", "title"])
+        res = await search_embeddings(
+            es, emb,
+            index=settings.es_index,
+            source=["imgUrl", "title", "userId", "userName", "postedOn"]
+        )
         return res
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
