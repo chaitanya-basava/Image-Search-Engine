@@ -1,9 +1,11 @@
 {
-  "skyscraper_skyscraper" : 0,
-  "hamsters" : 0,
-  "sunrise" : 0,
-  "nature" : 0,
-  "animals_animal" : 0,
-  "sunset" : 0,
-  "cat_cats" : 0
+  "skyscraper_skyscraper": 10,
+  "hamsters": 7,
+  "sunrise": 12,
+  "waterfall_waterfalls": 10,
+  "nature": 7,
+  "city": 16,
+  "cat_cats": 10,
+  "dog_dogs": 12,
+  "village": 16
 }

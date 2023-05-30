@@ -50,7 +50,7 @@ if __name__ == "__main__":
         kafka_stream_source
         .option("subscribe", topic_name)
         .option("startingOffsets", "earliest")
-        .option("maxOffsetsPerTrigger", 50)
+        .option("maxOffsetsPerTrigger", 30)
         .load()
     )
 
