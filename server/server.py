@@ -17,6 +17,7 @@ app.add_middleware(
 
 # load env variables
 settings = get_settings()
+source = ["imgUrl", "title", "userId", "userName", "postedOn"]
 
 # create es connection
 print(check_connection(settings.es_host, settings.es_port))
@@ -39,7 +40,9 @@ async def get_similar_images_text(query: Query):
         res = await search_embeddings(
             es, emb,
             index=settings.es_index,
-            source=["imgUrl", "title", "userId", "userName", "postedOn"]
+            source=source,
+            page=query.page,
+            k=query.rowsPerPage
         )
         return res
     except Exception as e:
@@ -61,7 +64,9 @@ async def get_similar_images(query: Query):
         res = await search_embeddings(
             es, emb,
             index=settings.es_index,
-            source=["imgUrl", "title", "userId", "userName", "postedOn"]
+            source=source,
+            page=query.page,
+            k=query.rowsPerPage
         )
         return res
     except Exception as e:

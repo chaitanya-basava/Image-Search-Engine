@@ -1,11 +1,14 @@
-import { Grid, ImageList, ImageListItem, ListItemText, ListSubheader } from '@mui/material';
-import { useMediaQuery, useTheme } from '@mui/material';
+import * as React from 'react';
+import { TablePagination, useMediaQuery, useTheme } from '@mui/material';
 import ManageSearchIcon from '@mui/icons-material/ManageSearch';
 import { ImageCard, ImageCardProps } from '../image-card/image-card';
+import { Grid, ImageList, ImageListItem, ListSubheader } from '@mui/material';
 
 interface ResultsProps {
     cards: Array<ImageCardProps>;
     phrase: string;
+    getResults: Function;
+    newPhrase: boolean;
 }
 
 export function ResultsContainer(props: ResultsProps) {
@@ -13,7 +16,34 @@ export function ResultsContainer(props: ResultsProps) {
     const isLarge = useMediaQuery(theme.breakpoints.up('lg'));
     const isExtraLarge = useMediaQuery(theme.breakpoints.up('xl'));
 
+    const [page, setPage] = React.useState(0);
+    const [rowsPerPage, setRowsPerPage] = React.useState(10);
+
+    const handleChangePage = (
+        event: React.MouseEvent<HTMLButtonElement> | null,
+        newPage: number
+    ) => {
+        setPage(newPage);
+
+        props.getResults(props.phrase, false, newPage, rowsPerPage);
+    };
+
+    const handleChangeRowsPerPage = (
+        event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    ) => {
+        const newRowsPerPage = parseInt(event.target.value, 10);
+        setRowsPerPage(newRowsPerPage);
+        setPage(0);
+
+        props.getResults(props.phrase, false, 0, newRowsPerPage);
+    };
+
     if (props.cards.length === 0) {
+        if (page !== 0 || rowsPerPage !== 10) {
+            setRowsPerPage(10);
+            setPage(0);
+        }
+
         return (
             <Grid
                 container
@@ -30,7 +60,12 @@ export function ResultsContainer(props: ResultsProps) {
             </Grid>
         );
     } else {
-        var numCols = 1;
+        if (props.newPhrase && (page !== 0 || rowsPerPage !== 10)) {
+            setRowsPerPage(10);
+            setPage(0);
+        }
+        
+        let numCols = 1;
 
         if (isExtraLarge) numCols = 3;
         else if (isLarge) numCols = 2;
@@ -69,6 +104,24 @@ export function ResultsContainer(props: ResultsProps) {
                             score={item.score}
                         />
                     ))}
+                    <ImageListItem key="pagination" cols={numCols}>
+                        <ListSubheader
+                            sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                            }}
+                        >
+                            <TablePagination
+                                component="div"
+                                count={100}
+                                page={page}
+                                onPageChange={handleChangePage}
+                                rowsPerPage={rowsPerPage}
+                                onRowsPerPageChange={handleChangeRowsPerPage}
+                            />
+                        </ListSubheader>
+                    </ImageListItem>
                 </ImageList>
             </Grid>
         );

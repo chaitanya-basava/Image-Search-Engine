@@ -1,7 +1,7 @@
 import { createBoard } from '@wixc3/react-board';
 import { ResultsContainer } from '../../../components/results-container/results-container';
 
-var example = [
+const example = [
     {
         title: '2015 Grizzly Bear with Salmon',
         imgUrl: '65535/52891339745_89ee986062_z.jpg',
@@ -30,7 +30,7 @@ var example = [
 
 export default createBoard({
     name: 'ResultsContainer',
-    Board: () => <ResultsContainer cards={example} phrase="random" />,
+    Board: () => <ResultsContainer cards={example} phrase="random" getResults={() => {}} newPhrase={true} />,
     environmentProps: {
         canvasWidth: 1020,
         windowHeight: 839,

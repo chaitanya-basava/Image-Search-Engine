@@ -6,6 +6,7 @@ import { ImageCardProps } from './components/image-card/image-card';
 interface AppState {
     cards: Array<ImageCardProps>;
     phrase: string;
+    newPhrase: boolean;
 }
 
 class App extends React.Component<{}, AppState> {
@@ -14,38 +15,15 @@ class App extends React.Component<{}, AppState> {
         this.state = {
             cards: [],
             phrase: '',
+            newPhrase: true,
         };
     }
 
     search = (event: any) => {
-        var code = event.keyCode || event.which;
-        var phrase = event.target.value;
+        const code = event.keyCode || event.which;
+        const phrase = event.target.value;
         if (code === 13 && phrase.length > 2) {
-            fetch('http://localhost:80/text_search', {
-                method: 'POST',
-                mode: 'cors',
-                body: JSON.stringify({
-                    phrase: phrase,
-                }),
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            })
-                .then((response) => response.json())
-                .then((data) => {
-                    this.setState((state) => ({
-                        cards: data.map((i: any) => {
-                            return {
-                                ...i._source,
-                                score: i._score,
-                            };
-                        }),
-                        phrase: phrase,
-                    }));
-                })
-                .catch((err) => {
-                    console.log(err.message);
-                });
+            this.getResults(phrase, true);
 
             event.target.value = '';
         }
@@ -54,6 +32,8 @@ class App extends React.Component<{}, AppState> {
     clearResults = () => {
         this.setState((state) => ({
             cards: [],
+            phrase: '',
+            newPhrase: true,
         }));
     };
 
@@ -65,10 +45,46 @@ class App extends React.Component<{}, AppState> {
                     clear={this.clearResults}
                     displayClear={this.state.cards.length !== 0}
                 />
-                <ResultsContainer cards={this.state.cards} phrase={this.state.phrase} />
+                <ResultsContainer
+                    cards={this.state.cards}
+                    phrase={this.state.phrase}
+                    getResults={this.getResults}
+                    newPhrase={this.state.newPhrase}
+                />
             </div>
         );
     }
+
+    getResults = (phrase: string, newPhrase: boolean, page: number = 0, rowsPerPage: number = 10) => {
+        fetch('http://localhost:80/text_search', {
+            method: 'POST',
+            mode: 'cors',
+            body: JSON.stringify({
+                phrase: phrase,
+                page: page,
+                rowsPerPage: rowsPerPage,
+            }),
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                this.setState((state) => ({
+                    cards: data.map((i: any) => {
+                        return {
+                            ...i._source,
+                            score: i._score,
+                        };
+                    }),
+                    phrase: phrase,
+                    newPhrase: newPhrase,
+                }));
+            })
+            .catch((err) => {
+                console.log(err.message);
+            });
+    };
 }
 
 export default App;

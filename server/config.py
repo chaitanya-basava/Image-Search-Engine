@@ -6,6 +6,8 @@ from pydantic import BaseModel, BaseSettings
 class Query(BaseModel):
     phrase: Union[str, None]
     image: Union[str, None]
+    page: Union[int, None] = 0
+    rowsPerPage: Union[int, None] = 10
 
 
 class Settings(BaseSettings):
