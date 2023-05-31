@@ -1,8 +1,7 @@
 import * as React from 'react';
-import { TablePagination, useMediaQuery, useTheme } from '@mui/material';
 import ManageSearchIcon from '@mui/icons-material/ManageSearch';
 import { ImageCard, ImageCardProps } from '../image-card/image-card';
-import { Grid, ImageList, ImageListItem, ListSubheader } from '@mui/material';
+import { TablePagination, useMediaQuery, useTheme, Grid, ImageList, ImageListItem, ListSubheader } from '@mui/material';
 
 interface ResultsProps {
     cards: Array<ImageCardProps>;
