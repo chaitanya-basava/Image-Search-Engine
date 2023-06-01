@@ -42,6 +42,8 @@ if __name__ == "__main__":
         .config("spark.streaming.stopGracefullyOnShutdown", "true") \
         .getOrCreate()
 
+    spark.sparkContext.setLogLevel("INFO")
+
     predict = load_model_udf(spark, args.model_uri)
     avroSchema = open("../schemas/flickr_image.avsc", "r").read()
 

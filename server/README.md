@@ -39,7 +39,7 @@ python ../model/clip_model.py
 3. Run the server
 
 ```
-python main.py
+ES_HOST=localhost uvicorn server:app --host 0.0.0.0 --port 80
 ```
 
 ## Docker container set up

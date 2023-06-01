@@ -39,4 +39,27 @@ The backend server is a lightweight FastAPI based server, which exposes 2 endpoi
 and returns the top K matching responses stored in elasticsearch. These are then displayed in
 the KNN score order on the frontend.
 
-### Demo [To be added]
+### Demo
+
+<div style="text-align:center">
+    <img src="imgs/demo/1.png" alt="starter page">
+</div>
+
+Below is an example of the results when searching with phrase `playing dogs`.
+
+<div style="text-align:center">
+    <img src="imgs/demo/2.png" alt="eng phrase">
+</div>
+
+[OpenAI's CLIP model](https://openai.com/research/clip) has been trained on multiple languages and
+hence it has the capability to infer text from various languages. Below is an example
+when using the german translated phrase for `playing dogs` which is `spielende Hunde`.
+
+<div style="text-align:center">
+    <img src="imgs/demo/3.png" alt="architecture">
+</div>
+
+As you can see the results are very similar to when an english phrase was used.
+This demonstrates the multilingual capability of CLIP model.
+
+The results as a whole display the capability of the model to carry out cross domain tasks across text and images.
