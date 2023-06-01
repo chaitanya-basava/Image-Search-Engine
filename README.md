@@ -10,9 +10,7 @@ It is a rough simulation of a real world implementation and contains various mod
 
 ### Architecture diagram
 
-<div style="text-align:center">
-    <img src="imgs/architecture.jpg" alt="architecture">
-</div>
+![architecture.jpg](imgs/architecture.jpg)
 
 Images from Flickr are extracted using an API key and the
 [search API](https://www.flickr.com/services/api/flickr.photos.search.html) provided by the Flickr team.
@@ -41,25 +39,32 @@ the KNN score order on the frontend.
 
 ### Demo
 
-<div style="text-align:center">
-    <img src="imgs/demo/1.png" alt="starter page">
-</div>
+![1.png](imgs/demo/1.png)
 
 Below is an example of the results when searching with phrase `playing dogs`.
 
-<div style="text-align:center">
-    <img src="imgs/demo/2.png" alt="eng phrase">
-</div>
+![2.png](imgs/demo/2.png)
 
 [OpenAI's CLIP model](https://openai.com/research/clip) has been trained on multiple languages and
 hence it has the capability to infer text from various languages. Below is an example
 when using the german translated phrase for `playing dogs` which is `spielende Hunde`.
 
-<div style="text-align:center">
-    <img src="imgs/demo/3.png" alt="architecture">
-</div>
+![3.png](imgs/demo/3.png)
 
 As you can see the results are very similar to when an english phrase was used.
 This demonstrates the multilingual capability of CLIP model.
 
 The results as a whole display the capability of the model to carry out cross domain tasks across text and images.
+
+### Tech stack used
+
+1. [Confluent Kafka](https://www.confluent.io/lp/apache-kafka)
+2. [ElasticSearch](https://www.elastic.co/elasticsearch/)
+3. [Pyspark streaming](https://spark.apache.org/docs/latest/streaming-programming-guide.html)
+4. [FastAPI](https://fastapi.tiangolo.com/lo/)
+5. [HuggingFace transformers](https://huggingface.co/)
+6. [Reactjs](https://react.dev/)
+
+Please consider staring the repo if you find this repo to be useful.
+
+Feel free to connect with me on [LinkedIn](https://www.linkedin.com/in/basava-sai-naga-viswa-chaitanya-665083172/).
