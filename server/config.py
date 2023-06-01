@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     es_host: str
     es_port: int
     es_index: str = "flickr-images"
+    model_path: str = "../model/mlflow_clip_model"
     img_url_prefix: str = "https://farm66.staticflickr.com/"
 
     class Config:

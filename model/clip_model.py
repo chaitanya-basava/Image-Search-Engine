@@ -1,15 +1,17 @@
+import os
 import torch
 import mlflow
 import shutil
+import base64
 import requests
+import validators
 import numpy as np
 import pandas as pd
 from PIL import Image
+from io import BytesIO
+from typing import List
 from transformers import logging
 from sentence_transformers import SentenceTransformer
-
-from pyspark.sql import SparkSession
-from pyspark.sql.types import ArrayType, DoubleType
 
 logging.set_verbosity(40)
 
@@ -36,8 +38,22 @@ class ClipImageEmbeddingModel(mlflow.pyfunc.PythonModel):
 
         return pd.DataFrame(image_embeds.tolist())
 
+    def extract_text_embeddings(self, phrase: str) -> List[float]:
+        phrase = phrase.strip()
+        text_emds = self.model.encode(phrase, convert_to_numpy=True, normalize_embeddings=True)
+        return text_emds.tolist()
 
-default_model_path = "./mlflow_clip_model"
+    def extract_image_embeddings(self, image_str: str) -> List[float]:
+        if validators.url(image_str):
+            image = Image.open(requests.get(image_str, stream=True).raw)
+        else:
+            image = Image.open(BytesIO(base64.b64decode(image_str)))
+
+        image_emds = self.model.encode(image, convert_to_numpy=True, normalize_embeddings=True)
+        return image_emds.tolist()
+
+
+default_model_path = "../model/mlflow_clip_model"
 
 
 def save_model(path=default_model_path):
@@ -49,12 +65,9 @@ def load_model(path=default_model_path):
     return mlflow.pyfunc.load_model(path)
 
 
-def load_model_udf(spark: SparkSession, path=default_model_path):
-    return mlflow.pyfunc.spark_udf(spark=spark, model_uri=path, result_type=ArrayType(DoubleType()))
-
-
 if __name__ == '__main__':
-    shutil.rmtree(default_model_path)
+    if os.path.exists(default_model_path):
+        shutil.rmtree(default_model_path)
     save_model(default_model_path)
     model = load_model(default_model_path)
 

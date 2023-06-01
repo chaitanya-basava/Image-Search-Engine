@@ -1,5 +1,5 @@
-<div align="center">  
-    <img height="50" src="./src/assets/codux.svg">  
+<div style="text-align:center">  
+    <img height="50" src="./src/assets/codux.svg" alt="codux">  
     <h1>React App template for Codux</h1>
 </div>
 

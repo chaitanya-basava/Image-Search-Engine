@@ -1,15 +1,20 @@
+import mlflow
 import argparse
 from typing import Union
 import pyspark.sql.functions as f
 from pyspark.sql import SparkSession
 from pyspark.sql.avro.functions import from_avro
+from pyspark.sql.types import ArrayType, DoubleType
 from pyspark.sql.streaming import DataStreamReader, DataStreamWriter
 
-from clip_model import load_model_udf
+
+def load_model_udf(_spark: SparkSession, path: str):
+    return mlflow.pyfunc.spark_udf(spark=_spark, model_uri=path, result_type=ArrayType(DoubleType()))
 
 
 parser = argparse.ArgumentParser(description="Flickr image embedding extractor spark application")
 parser.add_argument("-t", "--topic", dest="topic_name", type=str, required=True)
+parser.add_argument("-m", "--model_uri", dest="model_uri", default="../model/mlflow_clip_model", type=str)
 parser.add_argument("-kp", "--kafka_props", dest="kafka_props_path", default="../kafka/local.properties", type=str)
 parser.add_argument("-ep", "--es_props", dest="es_props_path", default="../elasticsearch/local.properties", type=str)
 args = parser.parse_args()
@@ -37,7 +42,7 @@ if __name__ == "__main__":
         .config("spark.streaming.stopGracefullyOnShutdown", "true") \
         .getOrCreate()
 
-    predict = load_model_udf(spark)
+    predict = load_model_udf(spark, args.model_uri)
     avroSchema = open("../schemas/flickr_image.avsc", "r").read()
 
     topic_name = args.topic_name

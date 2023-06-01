@@ -10,7 +10,9 @@ It is a rough simulation of a real world implementation and contains various mod
 
 ### Architecture diagram
 
-![architecture.png](imgs/architecture.png)
+<div style="text-align:center">
+    <img src="imgs/architecture.jpg" alt="architecture">
+</div>
 
 Images from Flickr are extracted using an API key and the
 [search API](https://www.flickr.com/services/api/flickr.photos.search.html) provided by the Flickr team.

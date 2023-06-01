@@ -30,7 +30,13 @@ python create_index_es.py
 pip install -r requirements.txt
 ```
 
-2. Run the server
+2. Create the necessary model artifact
+
+```
+python ../model/clip_model.py
+```
+
+3. Run the server
 
 ```
 python main.py
@@ -38,10 +44,10 @@ python main.py
 
 ## Docker container set up
 
-1. Build the docker image
+1. Build the docker image, run this from parent directory
 
 ```
-docker build -t image-search-server .
+docker build -t image-search-server -f ./server/Dockerfile .
 ```
 
 2. Run the container

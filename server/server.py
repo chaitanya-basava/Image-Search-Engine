@@ -1,8 +1,8 @@
+import mlflow
 import uvicorn
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
-from model import EmbeddingModel
 from es.query import search_embeddings
 from config import get_settings, Query
 from es.conn import create_conn, check_connection
@@ -24,7 +24,7 @@ print(check_connection(settings.es_host, settings.es_port))
 es = create_conn(settings.es_host, settings.es_port)
 
 # load model
-model = EmbeddingModel()
+model = mlflow.pyfunc.load_model(settings.model_path).unwrap_python_model()
 
 # warm up call to model
 print(f"warm up model call, embedding size: {len(model.extract_text_embeddings('give me embeddings'))}")
