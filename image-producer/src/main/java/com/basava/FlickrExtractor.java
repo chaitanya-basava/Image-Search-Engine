@@ -129,7 +129,7 @@ public class FlickrExtractor {
             file.write(jsonResult);
             file.close();
 
-            logger.info("[UPDATED] tags at " + cachePath);
+            logger.info("[UPDATED] tags at {}", cachePath);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
