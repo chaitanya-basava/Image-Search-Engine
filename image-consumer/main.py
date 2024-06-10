@@ -2,7 +2,7 @@ import mlflow
 import argparse
 from typing import Union
 import pyspark.sql.functions as f
-from pyspark.sql import SparkSession
+from pyspark.sql import SparkSession, DataFrameReader
 from pyspark.sql.avro.functions import from_avro
 from pyspark.sql.types import ArrayType, DoubleType
 from pyspark.sql.streaming import DataStreamReader, DataStreamWriter
@@ -20,7 +20,7 @@ parser.add_argument("-ep", "--es_props", dest="es_props_path", default="../elast
 args = parser.parse_args()
 
 
-def load_configs(path: str, stream: Union[DataStreamReader, DataStreamWriter]):
+def load_configs(path: str, stream: Union[DataFrameReader, DataStreamReader, DataStreamWriter]):
     with open(path, 'r') as file:
         for line in file:
             line = line.strip().split("=")
@@ -50,7 +50,7 @@ if __name__ == "__main__":
     topic_name = args.topic_name
     kafka_stream_source = load_configs(
         args.kafka_props_path,
-        spark.readStream.format("kafka")
+        spark.read.format("kafka")
     )
 
     kafka_df = (
@@ -72,6 +72,8 @@ if __name__ == "__main__":
             ).alias("image_emb")
         )
     )
+
+    # img_emb_df.show(truncate=False)
 
     es_stream_sink = load_configs(
         args.es_props_path,

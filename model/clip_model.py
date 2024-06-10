@@ -10,10 +10,7 @@ import pandas as pd
 from PIL import Image
 from io import BytesIO
 from typing import List
-from transformers import logging
 from sentence_transformers import SentenceTransformer
-
-logging.set_verbosity(40)
 
 
 class ClipImageEmbeddingModel(mlflow.pyfunc.PythonModel):
