@@ -1,108 +1,100 @@
-import mlflow
+import json
 import argparse
-from typing import Union
-import pyspark.sql.functions as f
-from pyspark.sql import SparkSession, DataFrameReader
-from pyspark.sql.avro.functions import from_avro
-from pyspark.sql.types import ArrayType, DoubleType
-from pyspark.sql.streaming import DataStreamReader, DataStreamWriter
+import mlflow.pyfunc
+from io import BytesIO
+from confluent_kafka.avro import AvroConsumer
+from elasticsearch import Elasticsearch, helpers
+from fastavro import schemaless_reader, parse_schema
 
 
-def load_model_udf(_spark: SparkSession, path: str):
-    return mlflow.pyfunc.spark_udf(spark=_spark, model_uri=path, result_type=ArrayType(DoubleType()))
+def load_model(path: str):
+    return mlflow.pyfunc.load_model(path)
 
 
-parser = argparse.ArgumentParser(description="Flickr image embedding extractor spark application")
+def load_schema(schema_path: str):
+    with open(schema_path, 'r') as file:
+        schema = json.load(file)
+    return parse_schema(schema)
+
+
+parser = argparse.ArgumentParser(description="Flickr image embedding extractor application")
 parser.add_argument("-t", "--topic", dest="topic_name", type=str, required=True)
+parser.add_argument("-sp", "--schema_path", dest="schema_path", type=str, required=True)
 parser.add_argument("-m", "--model_uri", dest="model_uri", default="../model/mlflow_clip_model", type=str)
 parser.add_argument("-kp", "--kafka_props", dest="kafka_props_path", default="../kafka/local.properties", type=str)
 parser.add_argument("-ep", "--es_props", dest="es_props_path", default="../elasticsearch/local.properties", type=str)
 args = parser.parse_args()
 
 
-def load_configs(path: str, stream: Union[DataFrameReader, DataStreamReader, DataStreamWriter]):
+def process_messages(consumer, model, es, avro_schema):
+    actions = []
+    while True:
+        msg = consumer.poll(timeout=1.0)
+        print(msg)
+        if msg is None:
+            continue
+
+        try:
+            message_value = schemaless_reader(BytesIO(msg.value()), avro_schema)
+        except Exception as e:
+            print(f"Error deserializing message: {e}")
+            continue
+
+        img_url = message_value['imgUrl']
+        img_id = message_value['id']
+        full_img_url = f"https://farm66.staticflickr.com/{img_url}"
+        image_emb = model.predict(full_img_url)
+
+        action = {
+            "_index": args.topic_name,
+            "_id": img_id,
+            "_source": {
+                "imgUrl": img_url,
+                "image_emb": image_emb.tolist()
+            }
+        }
+        actions.append(action)
+        print(message_value)
+        if len(actions) >= 30:
+            helpers.bulk(es, actions)
+            actions = []
+
+    if actions:
+        helpers.bulk(es, actions)
+
+
+def load_configs(path: str):
+    configs = {}
     with open(path, 'r') as file:
         for line in file:
             line = line.strip().split("=")
             key, value = line[0], line[1]
-
-            if path.find("kafka"):
-                key = f"kafka.{key}"
-
-            stream = stream.option(key, value)
-
-    return stream
+            configs[key] = value
+    return configs
 
 
 if __name__ == "__main__":
-    spark = SparkSession \
-        .builder \
-        .master("local[3]") \
-        .appName("Image Consumer App") \
-        .config("spark.streaming.stopGracefullyOnShutdown", "true") \
-        .getOrCreate()
+    kafka_configs = load_configs(args.kafka_props_path)
 
-    spark.sparkContext.setLogLevel("INFO")
+    consumer = AvroConsumer({
+        'bootstrap.servers': kafka_configs['bootstrap.servers'],
+        'group.id': 'image-embedding-extractor',
+        'auto.offset.reset': 'earliest'
+    }, schema_registry=kafka_configs['schema.registry.url'])
+    consumer.subscribe([args.topic_name])
 
-    predict = load_model_udf(spark, args.model_uri)
-    avroSchema = open("../schemas/flickr_image.avsc", "r").read()
-
-    topic_name = args.topic_name
-    kafka_stream_source = load_configs(
-        args.kafka_props_path,
-        spark.read.format("kafka")
+    es = Elasticsearch(
+        [{'host': 'localhost', 'port': 9200, 'scheme': 'http'}],
+        basic_auth=("admin", "admin"),
+        verify_certs=False
     )
 
-    kafka_df = (
-        kafka_stream_source
-        .option("subscribe", topic_name)
-        .option("startingOffsets", "earliest")
-        .option("maxOffsetsPerTrigger", 30)
-        .load()
-    )
+    print(es.ping())
 
-    img_emb_df = (
-        kafka_df
-        .withColumn("value", f.expr("substring(value, 6, length(value)-5)"))  # needed when using confluent
-        .withColumn("value", from_avro("value", avroSchema))
-        .select(
-            "value.*",
-            predict(
-                f.concat(f.lit("https://farm66.staticflickr.com/"), f.col("value.imgUrl"))
-            ).alias("image_emb")
-        )
-    )
+    model = load_model(args.model_uri)
 
-    # img_emb_df.show(truncate=False)
+    avro_schema = load_schema(args.schema_path)
 
-    es_stream_sink = load_configs(
-        args.es_props_path,
-        img_emb_df.writeStream.format("org.elasticsearch.spark.sql")
-    )
+    print("Starting to process messages")
 
-    query = (
-        es_stream_sink
-        .queryName("Image embedding extractor")
-        .outputMode("append")
-        .option("es.mapping.id", "id")
-        .option("es.nodes.discovery", "false")
-        .option("es.resource", f"{topic_name}")
-        .option("es.nodes.wan.only", "true")  # needed to connect to specified node with http
-        .option("checkpointLocation", "chk-point-dir/img_emb_extractor-es")
-        .trigger(processingTime="1 minute")
-        .start()
-    )
-
-    # write to json for testing
-    # query = (
-    #     img_emb_df.writeStream
-    #     .format("json")
-    #     .queryName("Image embedding extractor")
-    #     .outputMode("append")
-    #     .option("path", "output")
-    #     .option("checkpointLocation", "chk-point-dir/img_emb_extractor")
-    #     .trigger(processingTime="1 minute")
-    #     .start()
-    # )
-
-    query.awaitTermination()
+    process_messages(consumer, model, es, avro_schema)

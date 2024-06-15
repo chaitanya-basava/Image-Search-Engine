@@ -1,3 +1,5 @@
+avro==1.11.3
 mlflow==2.3.1
-pyspark==3.4.0
-requests==2.29.0
+requests==2.31.0
+elasticsearch==8.7.0
+confluent-kafka==2.4.0

@@ -35,6 +35,10 @@ spark-submit --master "local[3]" --deploy-mode client --packages org.apache.spar
 
 ## Extra spark setup
 
+Make sure you have spark 3.4.3 installed. Avoid using any other version.
+
+```
+
 Check available java versions 
 ```
 /usr/libexec/java_home -V
