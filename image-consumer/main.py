@@ -1,11 +1,10 @@
 import mlflow
 import argparse
-from typing import Union
+from util import load_configs
 import pyspark.sql.functions as f
 from pyspark.sql import SparkSession, DataFrameReader
 from pyspark.sql.avro.functions import from_avro
 from pyspark.sql.types import ArrayType, DoubleType
-from pyspark.sql.streaming import DataStreamReader, DataStreamWriter
 
 
 def load_model_udf(_spark: SparkSession, path: str):
@@ -18,20 +17,6 @@ parser.add_argument("-m", "--model_uri", dest="model_uri", default="../model/mlf
 parser.add_argument("-kp", "--kafka_props", dest="kafka_props_path", default="../kafka/local.properties", type=str)
 parser.add_argument("-ep", "--es_props", dest="es_props_path", default="../elasticsearch/local.properties", type=str)
 args = parser.parse_args()
-
-
-def load_configs(path: str, stream: Union[DataFrameReader, DataStreamReader, DataStreamWriter]):
-    with open(path, 'r') as file:
-        for line in file:
-            line = line.strip().split("=")
-            key, value = line[0], line[1]
-
-            if path.find("kafka"):
-                key = f"kafka.{key}"
-
-            stream = stream.option(key, value)
-
-    return stream
 
 
 if __name__ == "__main__":
@@ -50,7 +35,7 @@ if __name__ == "__main__":
     topic_name = args.topic_name
     kafka_stream_source = load_configs(
         args.kafka_props_path,
-        spark.read.format("kafka")
+        spark.readStream.format("kafka")
     )
 
     kafka_df = (

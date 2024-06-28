@@ -1,4 +1,5 @@
 import argparse
+from util import load_configs
 import pyspark.sql.functions as f
 from pyspark.sql.avro.functions import from_avro
 from pyspark.sql import SparkSession, DataFrameReader
@@ -8,20 +9,6 @@ parser.add_argument("-t", "--topic", dest="topic_name", type=str, required=True)
 parser.add_argument("-kp", "--kafka_props", dest="kafka_props_path", default="../kafka/local.properties", type=str)
 parser.add_argument("-ep", "--es_props", dest="es_props_path", default="../elasticsearch/local.properties", type=str)
 args = parser.parse_args()
-
-
-def load_configs(path: str, stream: DataFrameReader):
-    with open(path, 'r') as file:
-        for line in file:
-            line = line.strip().split("=")
-            key, value = line[0], line[1]
-
-            if path.find("kafka"):
-                key = f"kafka.{key}"
-
-            stream = stream.option(key, value)
-
-    return stream
 
 
 if __name__ == "__main__":
