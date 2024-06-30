@@ -56,6 +56,7 @@ if __name__ == "__main__":
                 f.concat(f.lit("https://farm66.staticflickr.com/"), f.col("value.imgUrl"))
             ).alias("image_emb")
         )
+        .filter(f.col("image_emb")[0].isNull())
     )
 
     # img_emb_df.show(truncate=False)
@@ -77,17 +78,5 @@ if __name__ == "__main__":
         .trigger(processingTime="1 minute")
         .start()
     )
-
-    # write to json for testing
-    # query = (
-    #     img_emb_df.writeStream
-    #     .format("json")
-    #     .queryName("Image embedding extractor")
-    #     .outputMode("append")
-    #     .option("path", "output")
-    #     .option("checkpointLocation", "chk-point-dir/img_emb_extractor")
-    #     .trigger(processingTime="1 minute")
-    #     .start()
-    # )
 
     query.awaitTermination()

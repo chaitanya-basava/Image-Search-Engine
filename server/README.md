@@ -30,7 +30,7 @@ python create_index_es.py
 pip install -r requirements.txt
 ```
 
-2. Create the necessary model artifact
+2. Create the necessary model artifact (if not already created)
 
 ```
 python ../model/clip_model.py

@@ -10,6 +10,7 @@ import pandas as pd
 from PIL import Image
 from io import BytesIO
 from typing import List
+from PIL import UnidentifiedImageError
 from sentence_transformers import SentenceTransformer
 
 
@@ -22,8 +23,14 @@ class ClipImageEmbeddingModel(mlflow.pyfunc.PythonModel):
 
     def predict(self, context, df):
         images = []
-        for row in df.iloc:
-            images.append(Image.open(requests.get(row.to_list()[0], stream=True).raw))
+        to_remove = []
+        for idx, row in enumerate(df.iloc):
+            try:
+                images.append(Image.open(requests.get(row.to_list()[0], stream=True).raw))
+            except UnidentifiedImageError:
+                # to handle wrong/non-functional image url
+                images.append(Image.new("RGB", (224, 224)))
+                to_remove.append(idx)
 
         image_embeds = self.model.encode(
             images,
@@ -32,8 +39,12 @@ class ClipImageEmbeddingModel(mlflow.pyfunc.PythonModel):
             convert_to_numpy=True,
             normalize_embeddings=True
         )
+        image_embeds = image_embeds.tolist()
 
-        return pd.DataFrame(image_embeds.tolist())
+        for row in to_remove:
+            image_embeds[row] = [np.nan]
+
+        return pd.DataFrame(image_embeds)
 
     def extract_text_embeddings(self, phrase: str) -> List[float]:
         phrase = phrase.strip()
@@ -70,7 +81,8 @@ if __name__ == '__main__':
 
     url = pd.DataFrame([
         "https://farm66.staticflickr.com/65535/52743059408_a9eac98298_z.jpg",
-        "https://farm66.staticflickr.com/65535/52743059408_a9eac98298_z.jpg"
+        "https://farm66.staticflickr.com/65535/52743059408_a9eac98298_z.jpg",
+        "https://farm66.staticflickr.com/65535/52743059408_a9eac98298_z1122.jpg"
     ])
     embeds = model.predict(url)
     print(embeds.shape)

@@ -46,7 +46,7 @@ export const Header = ({ search, clear, displayClear }: HeaderProps) => {
                     <Box sx={{ flexGrow: 1 }} />
                     <IconButton
                         aria-label="LinkedIn"
-                        href="https://www.linkedin.com/in/basava-sai-naga-viswa-chaitanya-665083172/"
+                        href="https://www.linkedin.com/in/chaitu-basava/"
                         target="_blank"
                         rel="noopener"
                     >
