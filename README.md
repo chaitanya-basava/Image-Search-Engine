@@ -1,4 +1,4 @@
-# Image-Search-Engine
+# ImageLingo
 
 This repo contains an end-to-end implementation of an image search engine application.
 It is a rough simulation of a real world implementation and contains various modules, which are as follows
